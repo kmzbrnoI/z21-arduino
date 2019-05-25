@@ -547,7 +547,7 @@ bool XpressNetClass::setLocoFunc (byte Adr_High, byte Adr_Low, uint8_t type, uin
 		bitWrite(funcG4, fkt-13, fktbit);
 		//Daten über XNet senden:
 		//unsigned char setLocoFunc[] = {0xE4, 0x23, Adr_High, Adr_Low, funcG4, 0x00};	//Gruppe4 = F20 F19 F18 F17 F16 F15 F14 F13
-		unsigned char setLocoFunc[] = {0xE4, 0xF3, Adr_High, Adr_Low, funcG4, 0x00};	//Gruppe4 = F20 F19 F18 F17 F16 F15 F14 F13
+		unsigned char setLocoFunc[] = {0xE4, 0x23, Adr_High, Adr_Low, funcG4, 0x00};	//Gruppe4 = F20 F19 F18 F17 F16 F15 F14 F13
 		//0xF3 = undocumented command is used when a mulitMAUS is controlling functions f20..f13. 
 		getXOR(setLocoFunc, 6);
 		ok = XNetSendadd (setLocoFunc, 6);
@@ -560,7 +560,7 @@ bool XpressNetClass::setLocoFunc (byte Adr_High, byte Adr_Low, uint8_t type, uin
 			fktbit = !(bitRead(funcG5, fkt-21));
 		bitWrite(funcG5, fkt-21, fktbit);
 		//Daten über XNet senden:
-		unsigned char setLocoFunc[] = {0xE4, 0x28, Adr_High, Adr_Low, funcG5, 0x00};	//Gruppe5 = F28 F27 F26 F25 F24 F23 F22 F21
+		unsigned char setLocoFunc[] = {0xE4, 0x24, Adr_High, Adr_Low, funcG5, 0x00};	//Gruppe5 = F28 F27 F26 F25 F24 F23 F22 F21
 		getXOR(setLocoFunc, 6);
 		ok = XNetSendadd (setLocoFunc, 6);
 		//Slot anpassen:
