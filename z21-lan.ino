@@ -434,7 +434,7 @@ void Ethreceive() {
       clearIPSlot(Udp.remoteIP()[0], Udp.remoteIP()[1], Udp.remoteIP()[2], Udp.remoteIP()[3]);
       //Antwort von Z21: keine
       break;
-      case (0x40):
+    case (0x40):
       switch (packetBuffer[4]) { //X-Header
       case 0x21:
         switch (packetBuffer[5]) {  //DB0
@@ -516,18 +516,18 @@ void Ethreceive() {
             Debug.println(word(packetBuffer[6] & 0x3F, packetBuffer[7]));  //mit F1-F12
           #endif  */
           //Antwort: LAN_X_LOCO_INFO  Adr_MSB - Adr_LSB
-          XpressNet.getLocoInfo(packetBuffer[6] & 0x3F, packetBuffer[7]);
-          XpressNet.getLocoFunc(packetBuffer[6] & 0x3F, packetBuffer[7]);  //F13 bis F28
+          XpressNet.getLocoInfo(packetBuffer[6], packetBuffer[7]);
+          XpressNet.getLocoFunc(packetBuffer[6], packetBuffer[7]);  //F13 bis F28
         }
         break;
       case 0xE4:
         if (packetBuffer[5] == 0xF8) {  //DB0
           //LAN_X_SET_LOCO_FUNCTION  Adr_MSB        Adr_LSB            Type (EIN/AUS/UM)      Funktion
-          XpressNet.setLocoFunc(packetBuffer[6] & 0x3F, packetBuffer[7], packetBuffer[8] >> 6, packetBuffer[8] & B00111111);
+          XpressNet.setLocoFunc(packetBuffer[6], packetBuffer[7], packetBuffer[8] >> 6, packetBuffer[8] & B00111111);
         }
         else {
           //LAN_X_SET_LOCO_DRIVE            Adr_MSB          Adr_LSB      DB0          Dir+Speed
-          XpressNet.setLocoDrive(packetBuffer[6] & 0x3F, packetBuffer[7], packetBuffer[5] & B11, packetBuffer[8]);
+          XpressNet.setLocoDrive(packetBuffer[6], packetBuffer[7], packetBuffer[5] & B11, packetBuffer[8]);
           #if defined(DEBUG)
               Debug.print("Z21 Drive: ");
             Debug.print(word(packetBuffer[6] & 0x3F, packetBuffer[7]));
