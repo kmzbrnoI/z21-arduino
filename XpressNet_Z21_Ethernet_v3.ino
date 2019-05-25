@@ -2,13 +2,13 @@
     Z21 Ethernet Emulation für die App-Steuerung via Smartphone über XpressNet.
     Original: http://pgahtow.de/wiki/index.php?title=Z21_mobile#Z21_-_Slave_am_XpressNet
     Modified: by BorgMcz www.dccmm.cz
-    
+
     Version 3
     Neu:
     - customized only Arduino Uno and Leonardo base board
     - Uno UART 0 - pinRx 0, pinTx 1;  Mega UART 1 - pinRx 19, pinTx 18
  */
- 
+
 //----------------------------------------------------------------------------
 
 #define WebConfig 1    //HTTP Port 80 Website zur Konfiguration
@@ -17,7 +17,7 @@
 
 #include <EEPROM.h>
 
-#include <XpressNet.h> 
+#include <XpressNet.h>
 XpressNetClass XpressNet;
 
 //For use with Standard W5100 Library
@@ -57,7 +57,7 @@ byte XNetAddress = 25;    //Adresse im XpressNet
 
 // buffers for receiving and sending data
 #define UDP_TX_MAX_SIZE 10
-unsigned char packetBuffer[UDP_TX_MAX_SIZE]; //buffer to hold incoming packet, 
+unsigned char packetBuffer[UDP_TX_MAX_SIZE]; //buffer to hold incoming packet,
 //--> UDP_TX_PACKET_MAX_SIZE
 
 #define maxIP 10        //Speichergröße für IP-Adressen
@@ -83,9 +83,9 @@ void setup() {
     /* Disable SD card */
     pinMode(4, OUTPUT);
     digitalWrite(4, HIGH);
-  #endif  
-  
-  pinMode(Z21ResetPin, INPUT_PULLUP);  
+  #endif
+
+  pinMode(Z21ResetPin, INPUT_PULLUP);
   delay(50);
   if (digitalRead(Z21ResetPin) == LOW || EEPROM.read(EEXNet) > 32) {
     EEPROM.write(EEXNet, XNetAddress);
@@ -99,25 +99,25 @@ void setup() {
   ip[1] = EEPROM.read(EEip+1);
   ip[2] = EEPROM.read(EEip+2);
   ip[3] = EEPROM.read(EEip+3);
-  
+
   // start the Ethernet and UDP:
     pinMode(RESET_ETH, OUTPUT);
 	digitalWrite(RESET_ETH, LOW);		// set reset ETH shield
 	delay(2500);
 	digitalWrite(RESET_ETH, HIGH);  	// set no reset ETH shield
 	delay(2000);
-  
+
   Ethernet.begin(mac,ip);  //IP and MAC Festlegung
   #if WebConfig
     server.begin();    //HTTP Server
-  #endif  
+  #endif
   Udp.begin(localPort);  //UDP Z21 Port
 
   XpressNet.start(XNetAddress, XNetTxRxPin);    //Initialisierung XNet und Send/Receive-PIN
 
   for (int i = 0; i < maxIP; i++)
     clearIPSlot(i);  //löschen gespeicherter aktiver IP's
-    
+
 }
 
 /*
@@ -141,16 +141,16 @@ void loop() {
 
   #if WebConfig
     Webconfig();    //Webserver for Configuration
-  #endif  
-  
+  #endif
+
 
   //Nicht genutzte IP's aus Speicher löschen
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > interval) {
-    previousMillis = currentMillis;   
+    previousMillis = currentMillis;
     for (int i = 0; i < maxIP; i++) {
       if (ActIP[i].ip3 != 0) {  //Slot nicht leer?
-        if (ActIP[i].time > 0) 
+        if (ActIP[i].time > 0)
           ActIP[i].time--;    //Zeit herrunterrechnen
         else {
           clearIPSlot(i);   //clear IP DATA
@@ -180,7 +180,7 @@ void clearIPSlot(byte i) {
 //--------------------------------------------------------------------------------------------
 void clearIPSlot(byte ip0, byte ip1, byte ip2, byte ip3) {
   for (int i = 0; i < maxIP; i++) {
-    if (ActIP[i].ip0 == ip0 && ActIP[i].ip1 == ip1 && ActIP[i].ip2 == ip2 && ActIP[i].ip3 == ip3) 
+    if (ActIP[i].ip0 == ip0 && ActIP[i].ip1 == ip1 && ActIP[i].ip2 == ip2 && ActIP[i].ip3 == ip3)
       clearIPSlot(i);
   }
 }
@@ -234,7 +234,7 @@ void Webconfig() {
           //Website:
           client.println("<html><head><title>Z21</title></head><body>");
           client.println("<h1>Z21</h1><br />");
-          //----------------------------------------------------------------------------------------------------          
+          //----------------------------------------------------------------------------------------------------
           int firstPos = receivedText.indexOf("?");
           if (firstPos > -1) {
             client.println("-> accept change after RESET!");
@@ -255,16 +255,16 @@ void Webconfig() {
             ip[3] = Dip;
             if (EEPROM.read(EEXNet) != XNetAddress)
               EEPROM.write(EEXNet, XNetAddress);
-            if (EEPROM.read(EEip) != Aip)  
+            if (EEPROM.read(EEip) != Aip)
               EEPROM.write(EEip, Aip);
-            if (EEPROM.read(EEip+1) != Bip)  
+            if (EEPROM.read(EEip+1) != Bip)
               EEPROM.write(EEip+1, Bip);
-            if (EEPROM.read(EEip+2) != Cip)  
+            if (EEPROM.read(EEip+2) != Cip)
               EEPROM.write(EEip+2, Cip);
-            if (EEPROM.read(EEip+3) != Dip)  
+            if (EEPROM.read(EEip+3) != Dip)
               EEPROM.write(EEip+3, Dip);
           }
-          //----------------------------------------------------------------------------------------------------          
+          //----------------------------------------------------------------------------------------------------
           client.print("<form method=get>IP-Adr.: <input type=number min=10 max=254 name=A value=");
           client.println(ip[0]);
           client.print(">.<input type=number min=0 max=254 name=B value=");
@@ -280,9 +280,9 @@ void Webconfig() {
           client.println("</body></html>");
           break;
         }
-        if (c == '\n') 
+        if (c == '\n')
           currentLineIsBlank = true; // you're starting a new line
-        else if (c != '\r') 
+        else if (c != '\r')
           currentLineIsBlank = false; // you've gotten a character on the current line
       }
     }
@@ -300,34 +300,34 @@ void Ethreceive() {
     // send a reply, to the IP address and port that sent us the packet we received
     int header = (packetBuffer[3]<<8) + packetBuffer[2];
     //    int datalen = (packetBuffer[1]<<8) + packetBuffer[0];
-    byte data[16]; 
+    byte data[16];
     boolean ok = false;
     switch (header) {
     case 0x10:
       data[0] = 0xF5;  //Seriennummer 32 Bit (little endian)
       data[1] = 0x0A;
-      data[2] = 0x00; 
+      data[2] = 0x00;
       data[3] = 0x00;
       EthSend (0x08, 0x10, data, false, 0x00);
-      break; 
+      break;
     case 0x1A:
       data[0] = 0x01;  //HwType 32 Bit
       data[1] = 0x02;
-      data[2] = 0x02; 
+      data[2] = 0x02;
       data[3] = 0x00;
       data[4] = 0x20;  //FW Version 32 Bit
       data[5] = 0x01;
-      data[6] = 0x00; 
+      data[6] = 0x00;
       data[7] = 0x00;
       EthSend (0x0C, 0x1A, data, false, 0x00);
-      break;  
+      break;
     case 0x30:
       clearIPSlot(Udp.remoteIP()[0], Udp.remoteIP()[1], Udp.remoteIP()[2], Udp.remoteIP()[3]);
       //Antwort von Z21: keine
-      break; 
+      break;
       case (0x40):
       switch (packetBuffer[4]) { //X-Header
-      case 0x21: 
+      case 0x21:
         switch (packetBuffer[5]) {  //DB0
         case 0x21:
           data[0] = 0x63;
@@ -340,7 +340,7 @@ void Ethreceive() {
           data[0] = 0x62;
           data[1] = 0x22;
           data[2] = XpressNet.getPower();
-          //Debug.print("LAN_X_GET_STATUS "); 
+          //Debug.print("LAN_X_GET_STATUS ");
           //Debug.println(data[2], HEX);
           EthSend (0x08, 0x40, data, true, 0x00);
           break;
@@ -349,7 +349,7 @@ void Ethreceive() {
           break;
         case 0x81:
           XpressNet.setPower(csNormal);
-          break;  
+          break;
         }
         break;
       case 0x23:
@@ -358,41 +358,41 @@ void Ethreceive() {
           byte CV_LSB = packetBuffer[7];
           XpressNet.readCVMode(CV_LSB+1);
         }
-        break;             
+        break;
       case 0x24:
         if (packetBuffer[5] == 0x12) {  //DB0
           byte CV_MSB = packetBuffer[6];
           byte CV_LSB = packetBuffer[7];
-          byte value = packetBuffer[8]; 
+          byte value = packetBuffer[8];
           XpressNet.writeCVMode(CV_LSB+1, value);
         }
-        break;             
+        break;
       case 0x43:
         XpressNet.getTrntInfo(packetBuffer[5], packetBuffer[6]);
-        break;             
+        break;
       case 0x53:
         XpressNet.setTrntPos(packetBuffer[5], packetBuffer[6], packetBuffer[7] & 0x0F);
-        break;  
+        break;
       case 0x80:
         XpressNet.setPower(csEmergencyStop);
-        break;  
+        break;
       case 0xE3:
         if (packetBuffer[5] == 0xF0) {  //DB0
           //Antwort: LAN_X_LOCO_INFO  Adr_MSB - Adr_LSB
           XpressNet.getLocoInfo(packetBuffer[6] & 0x3F, packetBuffer[7]);
           XpressNet.getLocoFunc(packetBuffer[6] & 0x3F, packetBuffer[7]);  //F13 bis F28
         }
-        break;  
+        break;
       case 0xE4:
         if (packetBuffer[5] == 0xF8) {  //DB0
           //LAN_X_SET_LOCO_FUNCTION  Adr_MSB        Adr_LSB            Type (EIN/AUS/UM)      Funktion
-          XpressNet.setLocoFunc(packetBuffer[6] & 0x3F, packetBuffer[7], packetBuffer[8] >> 5, packetBuffer[8] & B00011111); 
+          XpressNet.setLocoFunc(packetBuffer[6] & 0x3F, packetBuffer[7], packetBuffer[8] >> 5, packetBuffer[8] & B00011111);
         }
         else {
           //LAN_X_SET_LOCO_DRIVE            Adr_MSB          Adr_LSB      DB0          Dir+Speed
-          XpressNet.setLocoDrive(packetBuffer[6] & 0x3F, packetBuffer[7], packetBuffer[5] & B11, packetBuffer[8]);       
+          XpressNet.setLocoDrive(packetBuffer[6] & 0x3F, packetBuffer[7], packetBuffer[5] & B11, packetBuffer[8]);
         }
-        break;  
+        break;
       case 0xE6:
         if (packetBuffer[5] == 0x30) {  //DB0
           byte Option = packetBuffer[8] & B11111100;  //Option DB3
@@ -406,16 +406,16 @@ void Ethreceive() {
             //Nicht von der APP Unterstützt
           }
         }
-        break;  
+        break;
       case 0xF1:
         data[0] = 0xf3;
         data[1] = 0x0a;
         data[2] = 0x01;   //V_MSB
         data[3] = 0x23;  //V_LSB
         EthSend (0x09, 0x40, data, true, 0x00);
-        break;     
+        break;
       }
-      break; 
+      break;
       case (0x50):
         addIPToSlot(Udp.remoteIP()[0], Udp.remoteIP()[1], Udp.remoteIP()[2], Udp.remoteIP()[3], packetBuffer[4]);
         notifyXNetPower (XpressNet.getPower());  //Zustand Gleisspannung Antworten
@@ -423,9 +423,9 @@ void Ethreceive() {
       case (0x51):
         data[0] = 0x00;
         data[1] = 0x00;
-        data[2] = 0x00;   
-        data[3] = addIPToSlot(Udp.remoteIP()[0], Udp.remoteIP()[1], Udp.remoteIP()[2], Udp.remoteIP()[3], 0);  
-        EthSend (0x08, 0x51, data, false, 0x00); 
+        data[2] = 0x00;
+        data[3] = addIPToSlot(Udp.remoteIP()[0], Udp.remoteIP()[1], Udp.remoteIP()[2], Udp.remoteIP()[3], 0);
+        EthSend (0x08, 0x51, data, false, 0x00);
       break;
       case (0x60):
       break;
@@ -443,7 +443,7 @@ void Ethreceive() {
         data[0] = 0x00;  //MainCurrent mA
         data[1] = 0x00;  //MainCurrent mA
         data[2] = 0x00;  //ProgCurrent mA
-        data[3] = 0x00;  //ProgCurrent mA        
+        data[3] = 0x00;  //ProgCurrent mA
         data[4] = 0x00;  //FilteredMainCurrent
         data[5] = 0x00;  //FilteredMainCurrent
         data[6] = 0x00;  //Temperature
@@ -537,9 +537,9 @@ void notifyXNetPower (uint8_t State)
     break;
   case csEmergencyStop:
     data[0] = 0x81;
-    data[1] = 0x00; 
+    data[1] = 0x00;
     break;
-  default: return;  
+  default: return;
   }
   EthSend(0x07, 0x40, data, true, 0x01);
 }
@@ -553,12 +553,12 @@ void notifyLokAll(uint8_t Adr_High, uint8_t Adr_Low, boolean Busy, uint8_t Steps
   byte DB2 = Steps;
   if (DB2 == 3)  //nicht vorhanden!
     DB2 = 4;
-  if (Busy) 
+  if (Busy)
     bitWrite(DB2, 3, 1);
   byte DB3 = Speed;
-  if (Direction == 1)  
+  if (Direction == 1)
     bitWrite(DB3, 7, 1);
-  byte data[9]; 
+  byte data[9];
   data[0] = 0xEF;  //X-HEADER
   data[1] = Adr_High & 0x3F;
   data[2] = Adr_Low;
@@ -570,7 +570,7 @@ void notifyLokAll(uint8_t Adr_High, uint8_t Adr_Low, boolean Busy, uint8_t Steps
   data[8] = F3;  //F21-F28
   if (Req == false)  //kein BC
     EthSend (14, 0x40, data, true, 0x00);  //Send Power und Funktions ask App
-  else EthSend (14, 0x40, data, true, 0x01);  //Send Power und Funktions to all active Apps 
+  else EthSend (14, 0x40, data, true, 0x01);  //Send Power und Funktions to all active Apps
 }
 
 //--------------------------------------------------------------------------------------------
@@ -580,7 +580,7 @@ void notifyTrnt(uint8_t Adr_High, uint8_t Adr_Low, uint8_t Pos) {
   data[1] = Adr_High;
   data[2] = Adr_Low;
   data[3] = Pos;
-  EthSend (0x09, 0x40, data, true, 0x01);  
+  EthSend (0x09, 0x40, data, true, 0x01);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -590,7 +590,7 @@ void notifyCVInfo(uint8_t State ) {
     byte data[2];
     data[0] = 0x61;  //HEADER
     data[1] = 0x13; //DB0
-    EthSend (0x07, 0x40, data, true, 0x00);  
+    EthSend (0x07, 0x40, data, true, 0x00);
   }
 }
 
@@ -606,7 +606,7 @@ void notifyCVResult(uint8_t cvAdr, uint8_t cvData ) {
   EthSend (0x0A, 0x40, data, true, 0x00);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------------
 
