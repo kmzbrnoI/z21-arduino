@@ -318,6 +318,7 @@ void XpressNetClass::receive(void)
 			}
 			if (XNetMsg[XNetdata1] == 0x40 && XNetMsg[XNetlength] >= 6) { 	// Locomotive is being operated by another device
 				XLokStsSetBusy (XNetMsg[XNetdata2], XNetMsg[XNetdata3]);
+				getLocoStateFull(XNetMsg[XNetdata2], XNetMsg[XNetdata3], false);
 			}
 		break;
 		case 0xE1:
