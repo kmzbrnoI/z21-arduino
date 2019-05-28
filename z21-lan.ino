@@ -524,6 +524,10 @@ void Ethreceive() {
         if (packetBuffer[5] == 0xF8) {  //DB0
           //LAN_X_SET_LOCO_FUNCTION  Adr_MSB        Adr_LSB            Type (EIN/AUS/UM)      Funktion
           XpressNet.setLocoFunc(packetBuffer[6], packetBuffer[7], packetBuffer[8] >> 6, packetBuffer[8] & B00111111);
+
+          // Send LAX_X_LOCO_INFO back for clients with Abo (just send to all)  
+          XpressNet.getLocoFunc(packetBuffer[6], packetBuffer[7]);  //F13 bis F28
+          XpressNet.getLocoInfo(packetBuffer[6], packetBuffer[7]);
         }
         else {
           //LAN_X_SET_LOCO_DRIVE            Adr_MSB          Adr_LSB      DB0          Dir+Speed
@@ -536,6 +540,9 @@ void Ethreceive() {
             Debug.print("-");
             Debug.println(packetBuffer[5] & B11);
             #endif
+            
+          // Send LAX_X_LOCO_INFO back for clients with Abo (just send to all)  
+          XpressNet.getLocoInfo(packetBuffer[6], packetBuffer[7]);            
         }
         break;
       case 0xE6:
@@ -956,5 +963,3 @@ int freeRam () {
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 #endif
-
-
